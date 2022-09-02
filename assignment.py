@@ -47,6 +47,7 @@ df_sub2 = df.columns[df.columns.str.contains(pat = "KRAS")]
 
 #df.plot.scatter(x = 'Unnamed: 0', y = 'NumMutPerSample')
 #add a line for second scatter plot, will figure something out later 
+#get list a columns without unnamed 0, get sampermut and plt.show()
 #print(col_sum)
 df_table = col_sum.to_frame('Total count')
 df_table = df_table.reset_index()
