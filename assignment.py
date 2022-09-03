@@ -1,6 +1,6 @@
 from pickle import FALSE
 import pandas as pd
-import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 
 df = pd.read_csv("/mnt/c/Users/Ryan/Desktop/mutations(1).csv")
@@ -44,9 +44,14 @@ df_sub2 = df.columns[df.columns.str.contains(pat = "KRAS")]
 #print(df[df_sub2].drop_duplicates().sum()) #says that 13 people have some variation of KRAS
 
 #df['NumMutPerSample'] = df.sum(numeric_only=True, axis=1)
+NumSamplePerMut = df_drop.sum(numeric_only=True, axis=0)
 
 #df.plot.scatter(x = 'Unnamed: 0', y = 'NumMutPerSample')
 #add a line for second scatter plot, will figure something out later 
+#get list a columns without unnamed 0, get sampermut and plt.show()
+
+plt.scatter(x = df_drop.columns, y = NumSamplePerMut )
+plt.show()
 #print(col_sum)
 df_table = col_sum.to_frame('T')
 df_table = df_table.reset_index()
