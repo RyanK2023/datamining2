@@ -1,7 +1,9 @@
 from pickle import FALSE
+from turtle import color
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import tkinter as tk #DO I NEED THIS?
 
 df = pd.read_csv("/mnt/c/Users/Ryan/Desktop/mutations(1).csv")
 cols = df.shape[1] - 1 #number of unique mutations = 3816
@@ -105,10 +107,76 @@ df_sub_sorted = df_sub_sorted.drop("index", axis = 1)
 df_div_sorted = df_table.sort_values('%C/%NC', ascending = False).reset_index()
 df_div_sorted = df_div_sorted.drop("index", axis = 1)
 
-print(df_t_sorted.head(10))
-print(df_c_sorted.head(10))
-print(df_nc_sorted.head(10))
-print(df_percentc_sorted.head(10))
-print(df_percentnc_sorted.head(10))
-print(df_sub_sorted.head(10))
-print(df_div_sorted.head(10))
+#print(df_t_sorted.head(10))
+#print(df_c_sorted.head(10))
+#print(df_nc_sorted.head(10))
+#print(df_percentc_sorted.head(10))
+#print(df_percentnc_sorted.head(10))
+#print(df_sub_sorted.head(10))
+#print(df_div_sorted.head(10))
+
+# RNF43 confusion matrix
+# Count up number of c that has mut
+# count up number of nc that has mut 
+#
+# true postive would be cancer patients that have the mut
+# false postives would be nc that has the mut 
+# false negative would be c that doesn't have the mut 
+# true negative is nc without the mut 
+#do it again with tp53
+
+#I think this is all right?
+rnf43_con = pd.DataFrame(columns = ['POSITIVE', 'NEGATIVE'], index = ['POSITIVE', 'NEGATIVE'])
+rnf43_true_pos = df_c['RNF43_GRCh38_17:58357800-58357800_Frame-Shift-Del_DEL_C-C--'].sum(axis = 0)
+rnf43_false_pos = df_nc['RNF43_GRCh38_17:58357800-58357800_Frame-Shift-Del_DEL_C-C--'].sum(axis = 0)
+rnf43_false_neg = (df_c.shape[0]) - rnf43_true_pos
+rnf43_true_neg = (df_nc.shape[0]) - rnf43_false_pos
+#print(rnf43_true_pos)
+#print(rnf43_false_pos)
+#print(rnf43_false_neg)
+#print(rnf43_true_neg)
+rnf43_con['POSITIVE']['POSITIVE'] = rnf43_true_pos
+rnf43_con['NEGATIVE']['POSITIVE'] = rnf43_false_neg
+rnf43_con['POSITIVE']['NEGATIVE'] = rnf43_false_pos
+rnf43_con['NEGATIVE']['NEGATIVE'] = rnf43_true_neg
+#print(rnf43_con)
+
+tp53_con = pd.DataFrame(columns = ['POSITIVE', 'NEGATIVE'], index = ['POSITIVE', 'NEGATIVE'])
+tp53_true_pos = df_c['TP53_GRCh38_17:7675088-7675088_Missense-Mutation_SNP_C-T-T_C-C-T'].sum(axis = 0)
+tp53_false_pos = df_nc['TP53_GRCh38_17:7675088-7675088_Missense-Mutation_SNP_C-T-T_C-C-T'].sum(axis = 0)
+tp53_false_neg = (df_c.shape[0]) - tp53_true_pos
+tp53_true_neg = (df_nc.shape[0]) - tp53_false_pos
+#print(rnf43_true_pos)
+#print(rnf43_false_pos)
+#print(rnf43_false_neg)
+#print(rnf43_true_neg)
+tp53_con['POSITIVE']['POSITIVE'] = tp53_true_pos
+tp53_con['NEGATIVE']['POSITIVE'] = tp53_false_neg
+tp53_con['POSITIVE']['NEGATIVE'] = tp53_false_pos
+tp53_con['NEGATIVE']['NEGATIVE'] = tp53_true_neg
+#print(tp53_con)
+
+plt.bar(rnf43_con.columns, rnf43_true_pos)
+plt.bar(rnf43_con.columns, rnf43_false_pos, bottom = rnf43_true_pos)
+plt.bar(rnf43_con.columns, rnf43_true_neg)
+plt.bar(rnf43_con.columns, rnf43_false_neg, bottom = rnf43_true_neg)
+
+plt.bar(tp53_con.columns, tp53_true_pos)
+plt.bar(tp53_con.columns, tp53_false_pos, bottom = tp53_true_pos)
+plt.bar(tp53_con.columns, tp53_true_neg)
+plt.bar(tp53_con.columns, tp53_false_neg, bottom = tp53_true_neg)
+plt.show() #can't view in current set up, just going to assume that it works
+
+rnf43_1d = [rnf43_true_pos, rnf43_false_pos, rnf43_true_neg, rnf43_false_neg]
+plt.pie(rnf43_1d)
+my_circle=plt.Circle( (0,0), 0.7, color='white') #code for adding a circle to the middle of the plot
+p=plt.gcf()
+p.gca().add_artist(my_circle)
+plt.show()
+
+tp53_1d = [tp53_true_pos, tp53_false_pos, tp53_true_neg, tp53_false_neg]
+plt.pie(tp53_1d)
+my_circle=plt.Circle( (0,0), 0.7, color='white') 
+p=plt.gcf()
+p.gca().add_artist(my_circle)
+plt.show()
