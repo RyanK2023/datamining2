@@ -180,3 +180,15 @@ my_circle=plt.Circle( (0,0), 0.7, color='white')
 p=plt.gcf()
 p.gca().add_artist(my_circle)
 plt.show()
+
+
+#rnf43 would be more useful for classification of the n and nc samples because of the higher counts of true postive and true negatives 
+
+
+df['True Postive'] = df_c.sum(axis = 1)
+df['False Postive'] = df_nc.sum(axis = 1)
+df['TP-FP'] = df['True Postive'] - df['False Postive']
+#print(df['TP-FP'].max()) #not sure if this is right 407
+
+df['%TP-%posfalse'] = (df['True Postive']/230) - (df['False Postive']/230)
+print(df['%TP-%posfalse'].max()) #1.796 not sure 
