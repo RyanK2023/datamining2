@@ -185,10 +185,87 @@ plt.show()
 #rnf43 would be more useful for classification of the n and nc samples because of the higher counts of true postive and true negatives 
 
 
-df['True Postive'] = df_c.sum(axis = 1)
-df['False Postive'] = df_nc.sum(axis = 1)
-df['TP-FP'] = df['True Postive'] - df['False Postive']
+#df['True Postive'] = df_c.sum(axis = 1, numeric_only= True)
+#df['False Postive'] = df_nc.sum(axis = 1, numeric_only= True)
+#df['TP-FP'] = df['True Postive'] - df['False Postive']
 #print(df['TP-FP'].max()) #not sure if this is right 407
+#df = df.sort_values('TP-FP', ascending = False)
+#print(df.head(10))
 
-df['%TP-%posfalse'] = (df['True Postive']/230) - (df['False Postive']/230)
-print(df['%TP-%posfalse'].max()) #1.796 not sure 
+#df['%TP-%posfalse'] = (df['True Postive']/230) - (df['False Postive']/230)
+#print(df['%TP-%posfalse'].max()) #1.796 not sure 
+
+
+df_c_sorted['TP-FP'] = df_c_sorted['C'] - df_c_sorted['NC']
+
+#print(df_c_sorted.head(10)) #braf has the highest count of tp-fp of 24 = F
+df_has_braf = df.loc[df['BRAF_GRCh38_7:140753336-140753336_Missense-Mutation_SNP_A-A-T'] == 1]
+#df_has_braf #this works I think 
+df_no_braf = df.loc[df['BRAF_GRCh38_7:140753336-140753336_Missense-Mutation_SNP_A-A-T'] == 0]
+#df_no_braf
+#make a confusion matrix 
+braf_con = pd.DataFrame(columns = ['POSITIVE', 'NEGATIVE'], index = ['POSITIVE', 'NEGATIVE'])
+#df[df.A > 0].shape[0]
+braf_true_pos = df_has_braf[df_has_braf["Unnamed: 0"].str.contains(pat = "NC") == False].shape[0]
+print(braf_true_pos)
+braf_false_pos = df_has_braf[df_has_braf["Unnamed: 0"].str.contains(pat = "NC")].shape[0]
+braf_false_neg = (df_c.shape[0]) - braf_true_pos
+braf_true_neg = (df_nc.shape[0]) - braf_false_pos
+#print(braf_true_pos)
+#print(braf_false_pos)
+#print(braf_false_neg)
+#print(braf_true_neg)
+braf_con['POSITIVE']['POSITIVE'] = braf_true_pos
+braf_con['NEGATIVE']['POSITIVE'] = braf_false_neg
+braf_con['POSITIVE']['NEGATIVE'] = braf_false_pos
+braf_con['NEGATIVE']['NEGATIVE'] = braf_true_neg
+print(braf_con) #I think this works?
+
+has_braf_sum = df_has_braf.sum(axis = 0, numeric_only= True).to_frame('TOTAL')
+
+has_braf_sum['TP'] = df_has_braf[df_has_braf["Unnamed: 0"].str.contains(pat = "NC") == False].sum(axis = 0, numeric_only= True)
+has_braf_sum['FP'] = df_has_braf[df_has_braf["Unnamed: 0"].str.contains(pat = "NC")].sum(axis = 0, numeric_only= True)
+has_braf_sum['TP-FP'] = has_braf_sum['TP'] - has_braf_sum['FP']
+
+#print(has_braf_sum.sort_values('TP-FP', ascending = False)) #Next value to work with is XYLT2
+
+xylt2_con = pd.DataFrame(columns = ['POSITIVE', 'NEGATIVE'], index = ['POSITIVE', 'NEGATIVE'])
+
+xylt2_true_pos = has_braf_sum['TP']['XYLT2_GRCh38_17:50356606-50356606_Frame-Shift-Del_DEL_C-C--']
+#print(xylt2_true_pos)
+
+xylt2_false_pos = has_braf_sum['FP']['XYLT2_GRCh38_17:50356606-50356606_Frame-Shift-Del_DEL_C-C--']
+xylt2_false_neg = 29 - xylt2_true_pos #nums taken from tp and fp of braf
+xylt2_true_neg = 5 - xylt2_false_pos
+
+
+xylt2_con['POSITIVE']['POSITIVE'] = xylt2_true_pos
+xylt2_con['NEGATIVE']['POSITIVE'] = xylt2_false_neg
+xylt2_con['POSITIVE']['NEGATIVE'] = xylt2_false_pos
+xylt2_con['NEGATIVE']['NEGATIVE'] = xylt2_true_neg
+#print(xylt2_con) #I think this works?
+
+
+no_braf_sum = df_no_braf.sum(axis = 0, numeric_only= True).to_frame('TOTAL')
+
+no_braf_sum['TP'] = df_no_braf[df_no_braf["Unnamed: 0"].str.contains(pat = "NC") == False].sum(axis = 0, numeric_only= True)
+no_braf_sum['FP'] = df_no_braf[df_no_braf["Unnamed: 0"].str.contains(pat = "NC")].sum(axis = 0, numeric_only= True)
+no_braf_sum['TP-FP'] = no_braf_sum['TP'] - no_braf_sum['FP']
+
+print(no_braf_sum.sort_values('TP-FP', ascending = False)) #Next value to work with is KRAS
+
+kras_con = pd.DataFrame(columns = ['POSITIVE', 'NEGATIVE'], index = ['POSITIVE', 'NEGATIVE'])
+
+kras_true_pos = no_braf_sum['TP']['KRAS_GRCh38_12:25245350-25245350_Missense-Mutation_SNP_C-C-A_C-C-G_C-C-T_C-G-G_C-A-A']
+#print(kras_true_pos)
+
+kras_false_pos = no_braf_sum['FP']['KRAS_GRCh38_12:25245350-25245350_Missense-Mutation_SNP_C-C-A_C-C-G_C-C-T_C-G-G_C-A-A']
+kras_false_neg = (df_c.shape[0]) - kras_true_pos - 34 #took total count of c, subtracted tp, and then the 34 people with braf
+kras_true_neg = (df_nc.shape[0])  - kras_false_pos - 34
+
+
+kras_con['POSITIVE']['POSITIVE'] = kras_true_pos
+kras_con['NEGATIVE']['POSITIVE'] = kras_false_neg
+kras_con['POSITIVE']['NEGATIVE'] = kras_false_pos
+kras_con['NEGATIVE']['NEGATIVE'] = kras_true_neg
+print(kras_con) #I think this works?
